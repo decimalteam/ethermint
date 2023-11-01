@@ -166,6 +166,11 @@ func genesisStateWithValSet(codec codec.Codec, genesisState simapp.GenesisState,
 	stakingGenesis := stakingtypes.NewGenesisState(stakingtypes.DefaultParams(), validators, delegations)
 	genesisState[stakingtypes.ModuleName] = codec.MustMarshalJSON(stakingGenesis)
 
+	var sendActive []banktypes.SendEnabled
+	sendActive = append(sendActive, banktypes.SendEnabled{
+		Denom:   sdk.DefaultBondDenom,
+		Enabled: true,
+	})
 	totalSupply := sdk.NewCoins()
 	for _, b := range balances {
 		// add genesis acc tokens to total supply
@@ -184,7 +189,13 @@ func genesisStateWithValSet(codec codec.Codec, genesisState simapp.GenesisState,
 	})
 
 	// update total supply
-	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultGenesisState().Params, balances, totalSupply, []banktypes.Metadata{}, true)
+	bankGenesis := banktypes.NewGenesisState(
+		banktypes.DefaultGenesisState().Params,
+		balances,
+		totalSupply,
+		[]banktypes.Metadata{},
+		sendActive,
+	)
 	genesisState[banktypes.ModuleName] = codec.MustMarshalJSON(bankGenesis)
 
 	return genesisState

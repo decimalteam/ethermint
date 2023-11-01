@@ -30,6 +30,6 @@ func TestEthermintAppExport(t *testing.T) {
 		encoding.MakeConfig(ModuleBasics),
 		simtestutil.NewAppOptionsWithFlagHome(t.TempDir()),
 	)
-	_, err := app2.ExportAppStateAndValidators(false, []string{})
+	_, err := app2.ExportAppStateAndValidators(false, []string{}, []string{})
 	require.NoError(t, err, "ExportAppStateAndValidators should not have an error")
 }

@@ -390,44 +390,44 @@ func (suite *AnteTestSuite) CreateTestEIP712MsgVoteV1(from sdk.AccAddress, priv 
 	return suite.CreateTestEIP712SingleMessageTxBuilder(priv, chainId, gas, gasAmount, msgVote)
 }
 
-func (suite *AnteTestSuite) CreateTestEIP712SubmitProposalV1(from sdk.AccAddress, priv cryptotypes.PrivKey, chainId string, gas uint64, gasAmount sdk.Coins) client.TxBuilder {
-	// Build V1 proposal messages. Must all be same-type, since EIP-712
-	// does not support arrays of variable type.
-	authAcc := suite.app.GovKeeper.GetGovernanceAccount(suite.ctx)
-
-	proposal1, ok := govtypes.ContentFromProposalType("My proposal 1", "My description 1", govtypes.ProposalTypeText)
-	suite.Require().True(ok)
-	content1, err := govtypesv1.NewLegacyContent(
-		proposal1,
-		sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), authAcc.GetAddress().Bytes()),
-	)
-	suite.Require().NoError(err)
-
-	proposal2, ok := govtypes.ContentFromProposalType("My proposal 2", "My description 2", govtypes.ProposalTypeText)
-	suite.Require().True(ok)
-	content2, err := govtypesv1.NewLegacyContent(
-		proposal2,
-		sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), authAcc.GetAddress().Bytes()),
-	)
-	suite.Require().NoError(err)
-
-	proposalMsgs := []sdk.Msg{
-		content1,
-		content2,
-	}
-
-	// Build V1 proposal
-	msgProposal, err := govtypesv1.NewMsgSubmitProposal(
-		proposalMsgs,
-		sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100))),
-		sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), from.Bytes()),
-		"Metadata",
-	)
-
-	suite.Require().NoError(err)
-
-	return suite.CreateTestEIP712SingleMessageTxBuilder(priv, chainId, gas, gasAmount, msgProposal)
-}
+//func (suite *AnteTestSuite) CreateTestEIP712SubmitProposalV1(from sdk.AccAddress, priv cryptotypes.PrivKey, chainId string, gas uint64, gasAmount sdk.Coins) client.TxBuilder {
+//	// Build V1 proposal messages. Must all be same-type, since EIP-712
+//	// does not support arrays of variable type.
+//	authAcc := suite.app.GovKeeper.GetGovernanceAccount(suite.ctx)
+//
+//	proposal1, ok := govtypes.ContentFromProposalType("My proposal 1", "My description 1", govtypes.ProposalTypeText)
+//	suite.Require().True(ok)
+//	content1, err := govtypesv1.NewLegacyContent(
+//		proposal1,
+//		sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), authAcc.GetAddress().Bytes()),
+//	)
+//	suite.Require().NoError(err)
+//
+//	proposal2, ok := govtypes.ContentFromProposalType("My proposal 2", "My description 2", govtypes.ProposalTypeText)
+//	suite.Require().True(ok)
+//	content2, err := govtypesv1.NewLegacyContent(
+//		proposal2,
+//		sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), authAcc.GetAddress().Bytes()),
+//	)
+//	suite.Require().NoError(err)
+//
+//	proposalMsgs := []sdk.Msg{
+//		content1,
+//		content2,
+//	}
+//
+//	// Build V1 proposal
+//	msgProposal, err := govtypesv1.NewMsgSubmitProposal(
+//		proposalMsgs,
+//		sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100))),
+//		sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), from.Bytes()),
+//		"Metadata",
+//	)
+//
+//	suite.Require().NoError(err)
+//
+//	return suite.CreateTestEIP712SingleMessageTxBuilder(priv, chainId, gas, gasAmount, msgProposal)
+//}
 
 func (suite *AnteTestSuite) CreateTestEIP712MsgExec(from sdk.AccAddress, priv cryptotypes.PrivKey, chainId string, gas uint64, gasAmount sdk.Coins) client.TxBuilder {
 	recipient := sdk.AccAddress(common.Address{}.Bytes())

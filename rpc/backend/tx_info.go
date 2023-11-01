@@ -17,6 +17,7 @@ package backend
 
 import (
 	"fmt"
+	tmrpcclient "github.com/cometbft/cometbft/rpc/client"
 	"math/big"
 
 	errorsmod "cosmossdk.io/errors"
@@ -269,8 +270,12 @@ func (b *Backend) GetTransactionReceipt(hash common.Hash) (map[string]interface{
 // GetTransactionByBlockHashAndIndex returns the transaction identified by hash and index.
 func (b *Backend) GetTransactionByBlockHashAndIndex(hash common.Hash, idx hexutil.Uint) (*rpctypes.RPCTransaction, error) {
 	b.logger.Debug("eth_getTransactionByBlockHashAndIndex", "hash", hash.Hex(), "index", idx)
+	sc, ok := b.clientCtx.Client.(tmrpcclient.SignClient)
+	if !ok {
+		return nil, errors.New("invalid rpc client")
+	}
 
-	block, err := b.clientCtx.Client.BlockByHash(b.ctx, hash.Bytes())
+	block, err := sc.BlockByHash(b.ctx, hash.Bytes())
 	if err != nil {
 		b.logger.Debug("block not found", "hash", hash.Hex(), "error", err.Error())
 		return nil, nil

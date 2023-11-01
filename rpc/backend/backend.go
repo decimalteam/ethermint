@@ -142,7 +142,7 @@ type EVMBackend interface {
 
 var _ BackendI = (*Backend)(nil)
 
-var bAttributeKeyEthereumBloom = []byte(evmtypes.AttributeKeyEthereumBloom)
+var bAttributeKeyEthereumBloom = evmtypes.AttributeKeyEthereumBloom
 
 // Backend implements the BackendI interface
 type Backend struct {
