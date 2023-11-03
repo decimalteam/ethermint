@@ -396,8 +396,8 @@ format-fix:
 # NOTE: Link to the tendermintdev/sdk-proto-gen docker images: 
 #       https://hub.docker.com/r/tendermintdev/sdk-proto-gen/tags
 #
-protoVer=v0.7
-protoImageName=tendermintdev/sdk-proto-gen:$(protoVer)
+protoVer=0.11.6
+protoImageName=ghcr.io/cosmos/proto-builder:$(protoVer)
 protoImage=$(DOCKER) run --network host --rm -v $(CURDIR):/workspace --workdir /workspace $(protoImageName)
 # ------
 # NOTE: cosmos/proto-builder image is needed because clang-format is not installed

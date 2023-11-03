@@ -13,7 +13,7 @@ for dir in $proto_dirs; do
   for file in $proto_files; do
     # Check if the go_package in the file is pointing to evmos
     if grep -q "option go_package.*ethermint" "$file"; then
-      buf generate --template proto/buf.gen.gogo.yaml "$file"
+      buf generate --template proto/buf.gen.gogo.yaml -v "$file"
     fi
   done
 done
