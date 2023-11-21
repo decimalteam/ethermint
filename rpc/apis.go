@@ -34,7 +34,7 @@ import (
 	"github.com/decimalteam/ethermint/rpc/namespaces/ethereum/web3"
 	ethermint "github.com/decimalteam/ethermint/types"
 
-	rpcclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
+	rpcclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 )
 
 // RPC namespaces and API version

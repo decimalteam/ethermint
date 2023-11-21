@@ -2,7 +2,6 @@ package keeper_test
 
 import (
 	"encoding/json"
-	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	"math/big"
 	"strings"
 
@@ -26,11 +25,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
-	dbm "github.com/cometbft/cometbft-db"
-	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/cometbft/cometbft/libs/log"
+	"github.com/cosmos/cosmos-sdk/simapp"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	evmtypes "github.com/decimalteam/ethermint/x/evm/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/libs/log"
+	dbm "github.com/tendermint/tm-db"
 )
 
 var _ = Describe("Feemarket", func() {
@@ -448,10 +448,7 @@ func setupTestWithContext(valMinGasPrice string, minGasPrice sdk.Dec, baseFee sd
 	privKey, msg := setupTest(valMinGasPrice + s.denom)
 	params := types.DefaultParams()
 	params.MinGasPrice = minGasPrice
-	err := s.app.FeeMarketKeeper.SetParams(s.ctx, params)
-	if err != nil {
-		return nil, banktypes.MsgSend{}
-	}
+	s.app.FeeMarketKeeper.SetParams(s.ctx, params)
 	s.app.FeeMarketKeeper.SetBaseFee(s.ctx, baseFee.BigInt())
 	s.Commit()
 
@@ -468,10 +465,7 @@ func setupTest(localMinGasPrices string) (*ethsecp256k1.PrivKey, banktypes.MsgSe
 		Denom:  s.denom,
 		Amount: amount,
 	}}
-	err := testutil.FundAccount(s.app.BankKeeper, s.ctx, address, initBalance)
-	if err != nil {
-		return nil, banktypes.MsgSend{}
-	}
+	testutil.FundAccount(s.app.BankKeeper, s.ctx, address, initBalance)
 
 	msg := banktypes.MsgSend{
 		FromAddress: address.String(),
@@ -498,7 +492,7 @@ func setupChain(localMinGasPricesStr string) {
 		app.DefaultNodeHome,
 		5,
 		encoding.MakeConfig(app.ModuleBasics),
-		simtestutil.NewAppOptionsWithFlagHome(app.DefaultNodeHome),
+		simapp.EmptyAppOptions{},
 		baseapp.SetMinGasPrices(localMinGasPricesStr),
 	)
 

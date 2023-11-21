@@ -19,7 +19,6 @@ import (
 	"math/big"
 
 	errorsmod "cosmossdk.io/errors"
-	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -30,10 +29,12 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/params"
+	"github.com/tendermint/tendermint/libs/log"
 
 	ethermint "github.com/decimalteam/ethermint/types"
 	"github.com/decimalteam/ethermint/x/evm/statedb"
 	"github.com/decimalteam/ethermint/x/evm/types"
+	evm "github.com/decimalteam/ethermint/x/evm/vm"
 )
 
 // Keeper grants access to the EVM module state and implements the go-ethereum StateDB interface.
@@ -71,8 +72,10 @@ type Keeper struct {
 	hooks types.EvmHooks
 
 	// custom stateless precompiled smart contracts
-	customPrecompiles vm.PrecompiledContract
+	customPrecompiles evm.PrecompiledContracts
 
+	// evm constructor function
+	evmConstructor evm.Constructor
 	// Legacy subspace
 	ss paramstypes.Subspace
 }
@@ -86,7 +89,8 @@ func NewKeeper(
 	bankKeeper types.BankKeeper,
 	sk types.StakingKeeper,
 	fmk types.FeeMarketKeeper,
-	customPrecompiles vm.PrecompiledContract,
+	customPrecompiles evm.PrecompiledContracts,
+	evmConstructor evm.Constructor,
 	tracer string,
 	ss paramstypes.Subspace,
 ) *Keeper {
@@ -111,6 +115,7 @@ func NewKeeper(
 		storeKey:          storeKey,
 		transientKey:      transientKey,
 		customPrecompiles: customPrecompiles,
+		evmConstructor:    evmConstructor,
 		tracer:            tracer,
 		ss:                ss,
 	}

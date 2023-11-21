@@ -16,14 +16,14 @@
 package types
 
 import (
+	"bytes"
 	"context"
 	"fmt"
-	tmrpcclient "github.com/cometbft/cometbft/rpc/client"
 	"math/big"
 	"strings"
 
-	abci "github.com/cometbft/cometbft/abci/types"
-	tmtypes "github.com/cometbft/cometbft/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 
 	errorsmod "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -92,15 +92,9 @@ func EthHeaderFromTendermint(header tmtypes.Header, bloom ethtypes.Bloom, baseFe
 
 // BlockMaxGasFromConsensusParams returns the gas limit for the current block from the chain consensus params.
 func BlockMaxGasFromConsensusParams(goCtx context.Context, clientCtx client.Context, blockHeight int64) (int64, error) {
-	tmrpcClient, ok := clientCtx.Client.(tmrpcclient.Client)
-	if !ok {
-		panic("incorrect tm rpc client")
-	}
-
-	resConsParams, err := tmrpcClient.ConsensusParams(goCtx, &blockHeight)
-	defaultGasLimit := int64(^uint32(0)) // #nosec G701
+	resConsParams, err := clientCtx.Client.ConsensusParams(goCtx, &blockHeight)
 	if err != nil {
-		return defaultGasLimit, err
+		return int64(^uint32(0)), err
 	}
 
 	gasLimit := resConsParams.ConsensusParams.Block.MaxGas
@@ -108,7 +102,7 @@ func BlockMaxGasFromConsensusParams(goCtx context.Context, clientCtx client.Cont
 		// Sets gas limit to max uint32 to not error with javascript dev tooling
 		// This -1 value indicating no block gas limit is set to max uint64 with geth hexutils
 		// which errors certain javascript dev tooling which only supports up to 53 bits
-		gasLimit = defaultGasLimit
+		gasLimit = int64(^uint32(0))
 	}
 
 	return gasLimit, nil
@@ -241,8 +235,8 @@ func BaseFeeFromEvents(events []abci.Event) *big.Int {
 		}
 
 		for _, attr := range event.Attributes {
-			if attr.Key == feemarkettypes.AttributeKeyBaseFee {
-				result, success := new(big.Int).SetString(attr.Value, 10)
+			if bytes.Equal(attr.Key, []byte(feemarkettypes.AttributeKeyBaseFee)) {
+				result, success := new(big.Int).SetString(string(attr.Value), 10)
 				if success {
 					return result
 				}

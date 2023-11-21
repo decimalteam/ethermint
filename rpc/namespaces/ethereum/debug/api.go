@@ -35,13 +35,13 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/server"
 
-	"github.com/cometbft/cometbft/libs/log"
 	"github.com/decimalteam/ethermint/rpc/backend"
 	rpctypes "github.com/decimalteam/ethermint/rpc/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/consensus/ethash"
 	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/tendermint/tendermint/libs/log"
 )
 
 // HandlerT keeps track of the cpu profiler and trace execution

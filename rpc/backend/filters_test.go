@@ -3,12 +3,12 @@ package backend
 import (
 	"encoding/json"
 
-	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/decimalteam/ethermint/rpc/backend/mocks"
 	ethrpc "github.com/decimalteam/ethermint/rpc/types"
 	evmtypes "github.com/decimalteam/ethermint/x/evm/types"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 func (suite *BackendTestSuite) TestGetLogs() {

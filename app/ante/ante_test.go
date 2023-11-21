@@ -16,7 +16,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256r1"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/crypto/types/multisig"
+	"github.com/cosmos/cosmos-sdk/simapp"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
+	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
+
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/authz"
 
@@ -1346,24 +1349,24 @@ func (suite AnteTestSuite) TestAnteHandlerWithParams() {
 func (suite *AnteTestSuite) TestConsumeSignatureVerificationGas() {
 	params := authtypes.DefaultParams()
 	msg := []byte{1, 2, 3, 4}
-	//cdc := simapp.MakeTestEncodingConfig().Amino
+	cdc := simapp.MakeTestEncodingConfig().Amino
 
 	p := authtypes.DefaultParams()
 	skR1, _ := secp256r1.GenPrivKey()
-	pkSet1, _, err := generatePubKeysAndSignatures(5, msg, false)
+	pkSet1, sigSet1, err := generatePubKeysAndSignatures(5, msg, false)
 	suite.Require().NoError(err)
 
 	multisigKey1 := kmultisig.NewLegacyAminoPubKey(2, pkSet1)
 	multisignature1 := multisig.NewMultisig(len(pkSet1))
 	expectedCost1 := expectedGasCostByKeys(pkSet1)
 
-	//for i := 0; i < len(pkSet1); i++ {
-	//	stdSig := legacytx.StdSignature{PubKey: pkSet1[i], Signature: sigSet1[i]}
-	//	sigV2, err := legacytx.StdSignatureToSignatureV2(cdc, stdSig)
-	//	suite.Require().NoError(err)
-	//	err = multisig.AddSignatureV2(multisignature1, sigV2, pkSet1)
-	//	suite.Require().NoError(err)
-	//}
+	for i := 0; i < len(pkSet1); i++ {
+		stdSig := legacytx.StdSignature{PubKey: pkSet1[i], Signature: sigSet1[i]}
+		sigV2, err := legacytx.StdSignatureToSignatureV2(cdc, stdSig)
+		suite.Require().NoError(err)
+		err = multisig.AddSignatureV2(multisignature1, sigV2, pkSet1)
+		suite.Require().NoError(err)
+	}
 
 	type args struct {
 		meter  sdk.GasMeter
