@@ -37,6 +37,12 @@ message EventMessage {
   string tx_type = 3;
 }
 
+// EventMessage
+message EventNewAddressContract {
+  // module which emits the event
+  string address = 1;
+}
+
 // EventBlockBloom defines an Ethereum block bloom filter event
 message EventBlockBloom {
   // bloom is the bloom filter of the block

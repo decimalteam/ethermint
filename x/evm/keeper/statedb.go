@@ -121,9 +121,11 @@ func (k *Keeper) SetBalance(ctx sdk.Context, addr common.Address, amount *big.In
 func (k *Keeper) SetAccount(ctx sdk.Context, addr common.Address, account statedb.Account) error {
 	// update account
 	cosmosAddr := sdk.AccAddress(addr.Bytes())
+	newAddressCreate := false
 	acct := k.accountKeeper.GetAccount(ctx, cosmosAddr)
 	if acct == nil {
 		acct = k.accountKeeper.NewAccountWithAddress(ctx, cosmosAddr)
+		newAddressCreate = true
 	}
 
 	if err := acct.SetSequence(account.Nonce); err != nil {
@@ -151,6 +153,15 @@ func (k *Keeper) SetAccount(ctx sdk.Context, addr common.Address, account stated
 		"codeHash", codeHash.Hex(),
 		"balance", account.Balance,
 	)
+	if account.IsContract() && newAddressCreate {
+		err := ctx.EventManager().EmitTypedEvent(
+			&types.EventNewAddressContract{Address: addr.Hex()},
+		)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
