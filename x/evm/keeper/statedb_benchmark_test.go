@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"github.com/holiman/uint256"
 	"math/big"
 	"testing"
 
@@ -47,7 +48,7 @@ func BenchmarkAddBalance(b *testing.B) {
 	suite.SetupTestWithT(b)
 	vmdb := suite.StateDB()
 
-	amt := big.NewInt(10)
+	amt := uint256.NewInt(10)
 
 	b.ResetTimer()
 	b.ReportAllocs()

@@ -16,6 +16,7 @@
 package geth
 
 import (
+	"github.com/decimalteam/ethermint/x/evm/statedb"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -41,7 +42,7 @@ type EVM struct {
 func NewEVM(
 	blockCtx vm.BlockContext,
 	txCtx vm.TxContext,
-	stateDB vm.StateDB,
+	stateDB *statedb.StateDB,
 	chainConfig *params.ChainConfig,
 	config vm.Config,
 	_ evm.PrecompiledContracts, // unused

@@ -1,6 +1,7 @@
 package statedb_test
 
 import (
+	"github.com/holiman/uint256"
 	"math/big"
 	"testing"
 
@@ -37,7 +38,7 @@ func (suite *StateDBTestSuite) TestAccount() {
 		{"non-exist account", func(db *statedb.StateDB) {
 			suite.Require().Equal(false, db.Exist(address))
 			suite.Require().Equal(true, db.Empty(address))
-			suite.Require().Equal(big.NewInt(0), db.GetBalance(address))
+			suite.Require().Equal(uint256.NewInt(0), db.GetBalance(address))
 			suite.Require().Equal([]byte(nil), db.GetCode(address))
 			suite.Require().Equal(common.Hash{}, db.GetCodeHash(address))
 			suite.Require().Equal(uint64(0), db.GetNonce(address))
@@ -55,7 +56,7 @@ func (suite *StateDBTestSuite) TestAccount() {
 			db = statedb.New(sdk.Context{}, keeper, emptyTxConfig)
 			suite.Require().Equal(true, db.Exist(address))
 			suite.Require().Equal(true, db.Empty(address))
-			suite.Require().Equal(big.NewInt(0), db.GetBalance(address))
+			suite.Require().Equal(uint256.NewInt(0), db.GetBalance(address))
 			suite.Require().Equal([]byte(nil), db.GetCode(address))
 			suite.Require().Equal(common.BytesToHash(emptyCodeHash), db.GetCodeHash(address))
 			suite.Require().Equal(uint64(0), db.GetNonce(address))
@@ -68,7 +69,7 @@ func (suite *StateDBTestSuite) TestAccount() {
 			// create a contract account
 			db.CreateAccount(address)
 			db.SetCode(address, []byte("hello world"))
-			db.AddBalance(address, big.NewInt(100))
+			db.AddBalance(address, uint256.NewInt(100))
 			db.SetState(address, key1, value1)
 			db.SetState(address, key2, value2)
 			suite.Require().NoError(db.Commit())
@@ -81,7 +82,7 @@ func (suite *StateDBTestSuite) TestAccount() {
 			// check dirty state
 			suite.Require().True(db.HasSuicided(address))
 			// balance is cleared
-			suite.Require().Equal(big.NewInt(0), db.GetBalance(address))
+			suite.Require().Equal(uint256.NewInt(0), db.GetBalance(address))
 			// but code and state are still accessible in dirty state
 			suite.Require().Equal(value1, db.GetState(address, key1))
 			suite.Require().Equal([]byte("hello world"), db.GetCode(address))
@@ -111,7 +112,7 @@ func (suite *StateDBTestSuite) TestAccountOverride() {
 	keeper := NewMockKeeper()
 	db := statedb.New(sdk.Context{}, keeper, emptyTxConfig)
 	// test balance carry over when overwritten
-	amount := big.NewInt(1)
+	amount := uint256.NewInt(1)
 
 	// init an EOA account, account overriden only happens on EOA account.
 	db.AddBalance(address, amount)
@@ -129,12 +130,12 @@ func (suite *StateDBTestSuite) TestAccountOverride() {
 func (suite *StateDBTestSuite) TestDBError() {
 	testCases := []struct {
 		name     string
-		malleate func(vm.StateDB)
+		malleate func(*statedb.StateDB)
 	}{
-		{"set account", func(db vm.StateDB) {
+		{"set account", func(db *statedb.StateDB) {
 			db.SetNonce(errAddress, 1)
 		}},
-		{"delete account", func(db vm.StateDB) {
+		{"delete account", func(db *statedb.StateDB) {
 			db.SetNonce(errAddress, 1)
 			suite.Require().True(db.Suicide(errAddress))
 		}},
@@ -151,23 +152,23 @@ func (suite *StateDBTestSuite) TestBalance() {
 	testCases := []struct {
 		name       string
 		malleate   func(*statedb.StateDB)
-		expBalance *big.Int
+		expBalance *uint256.Int
 	}{
 		{"add balance", func(db *statedb.StateDB) {
-			db.AddBalance(address, big.NewInt(10))
-		}, big.NewInt(10)},
+			db.AddBalance(address, uint256.NewInt(10))
+		}, uint256.NewInt(10)},
 		{"sub balance", func(db *statedb.StateDB) {
-			db.AddBalance(address, big.NewInt(10))
+			db.AddBalance(address, uint256.NewInt(10))
 			// get dirty balance
-			suite.Require().Equal(big.NewInt(10), db.GetBalance(address))
-			db.SubBalance(address, big.NewInt(2))
-		}, big.NewInt(8)},
+			suite.Require().Equal(uint256.NewInt(10), db.GetBalance(address))
+			db.SubBalance(address, uint256.NewInt(2))
+		}, uint256.NewInt(8)},
 		{"add zero balance", func(db *statedb.StateDB) {
-			db.AddBalance(address, big.NewInt(0))
-		}, big.NewInt(0)},
+			db.AddBalance(address, uint256.NewInt(0))
+		}, uint256.NewInt(0)},
 		{"sub zero balance", func(db *statedb.StateDB) {
-			db.SubBalance(address, big.NewInt(0))
-		}, big.NewInt(0)},
+			db.SubBalance(address, uint256.NewInt(0))
+		}, uint256.NewInt(0)},
 	}
 
 	for _, tc := range testCases {
@@ -291,39 +292,39 @@ func (suite *StateDBTestSuite) TestRevertSnapshot() {
 	v3 := common.BigToHash(big.NewInt(3))
 	testCases := []struct {
 		name     string
-		malleate func(vm.StateDB)
+		malleate func(*statedb.StateDB)
 	}{
-		{"set state", func(db vm.StateDB) {
+		{"set state", func(db *statedb.StateDB) {
 			db.SetState(address, v1, v3)
 		}},
-		{"set nonce", func(db vm.StateDB) {
+		{"set nonce", func(db *statedb.StateDB) {
 			db.SetNonce(address, 10)
 		}},
-		{"change balance", func(db vm.StateDB) {
-			db.AddBalance(address, big.NewInt(10))
-			db.SubBalance(address, big.NewInt(5))
+		{"change balance", func(db *statedb.StateDB) {
+			db.AddBalance(address, uint256.NewInt(10))
+			db.SubBalance(address, uint256.NewInt(5))
 		}},
-		{"override account", func(db vm.StateDB) {
+		{"override account", func(db *statedb.StateDB) {
 			db.CreateAccount(address)
 		}},
-		{"set code", func(db vm.StateDB) {
+		{"set code", func(db *statedb.StateDB) {
 			db.SetCode(address, []byte("hello world"))
 		}},
-		{"suicide", func(db vm.StateDB) {
+		{"suicide", func(db *statedb.StateDB) {
 			db.SetState(address, v1, v2)
 			db.SetCode(address, []byte("hello world"))
 			suite.Require().True(db.Suicide(address))
 		}},
-		{"add log", func(db vm.StateDB) {
+		{"add log", func(db *statedb.StateDB) {
 			db.AddLog(&ethtypes.Log{
 				Address: address,
 			})
 		}},
-		{"add refund", func(db vm.StateDB) {
+		{"add refund", func(db *statedb.StateDB) {
 			db.AddRefund(10)
 			db.SubRefund(5)
 		}},
-		{"access list", func(db vm.StateDB) {
+		{"access list", func(db *statedb.StateDB) {
 			db.AddAddressToAccessList(address)
 			db.AddSlotToAccessList(address, v1)
 		}},
@@ -337,7 +338,7 @@ func (suite *StateDBTestSuite) TestRevertSnapshot() {
 				// do some arbitrary changes to the storage
 				db := statedb.New(ctx, keeper, emptyTxConfig)
 				db.SetNonce(address, 1)
-				db.AddBalance(address, big.NewInt(100))
+				db.AddBalance(address, uint256.NewInt(100))
 				db.SetCode(address, []byte("hello world"))
 				db.SetState(address, v1, v2)
 				db.SetNonce(address2, 1)
@@ -398,9 +399,9 @@ func (suite *StateDBTestSuite) TestAccessList() {
 
 	testCases := []struct {
 		name     string
-		malleate func(vm.StateDB)
+		malleate func(*statedb.StateDB)
 	}{
-		{"add address", func(db vm.StateDB) {
+		{"add address", func(db *statedb.StateDB) {
 			suite.Require().False(db.AddressInAccessList(address))
 			db.AddAddressToAccessList(address)
 			suite.Require().True(db.AddressInAccessList(address))
@@ -413,7 +414,7 @@ func (suite *StateDBTestSuite) TestAccessList() {
 			db.AddAddressToAccessList(address)
 			suite.Require().True(db.AddressInAccessList(address))
 		}},
-		{"add slot", func(db vm.StateDB) {
+		{"add slot", func(db *statedb.StateDB) {
 			addrPresent, slotPresent := db.SlotInAccessList(address, value1)
 			suite.Require().False(addrPresent)
 			suite.Require().False(slotPresent)
@@ -434,7 +435,7 @@ func (suite *StateDBTestSuite) TestAccessList() {
 			suite.Require().True(addrPresent)
 			suite.Require().True(slotPresent)
 		}},
-		{"prepare access list", func(db vm.StateDB) {
+		{"prepare access list", func(db *statedb.StateDB) {
 			al := ethtypes.AccessList{{
 				Address:     address3,
 				StorageKeys: []common.Hash{value1},
@@ -565,7 +566,7 @@ func (suite *StateDBTestSuite) TestIterateStorage() {
 	suite.Require().Equal(1, len(storage))
 }
 
-func CollectContractStorage(db vm.StateDB) statedb.Storage {
+func CollectContractStorage(db *statedb.StateDB) statedb.Storage {
 	storage := make(statedb.Storage)
 	db.ForEachStorage(address, func(k, v common.Hash) bool {
 		storage[k] = v

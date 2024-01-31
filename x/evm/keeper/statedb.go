@@ -17,6 +17,7 @@ package keeper
 
 import (
 	"fmt"
+	"github.com/holiman/uint256"
 	"math/big"
 
 	sdkmath "cosmossdk.io/math"
@@ -43,7 +44,7 @@ func (k *Keeper) GetAccount(ctx sdk.Context, addr common.Address) *statedb.Accou
 		return nil
 	}
 
-	acct.Balance = k.GetBalance(ctx, addr)
+	acct.Balance, _ = uint256.FromBig(k.GetBalance(ctx, addr))
 	return acct
 }
 
@@ -85,13 +86,13 @@ func (k *Keeper) ForEachStorage(ctx sdk.Context, addr common.Address, cb func(ke
 }
 
 // SetBalance update account's balance, compare with current balance first, then decide to mint or burn.
-func (k *Keeper) SetBalance(ctx sdk.Context, addr common.Address, amount *big.Int) error {
+func (k *Keeper) SetBalance(ctx sdk.Context, addr common.Address, amount *uint256.Int) error {
 	cosmosAddr := sdk.AccAddress(addr.Bytes())
 
 	params := k.GetParams(ctx)
 	coin := k.bankKeeper.GetBalance(ctx, cosmosAddr, params.EvmDenom)
 	balance := coin.Amount.BigInt()
-	delta := new(big.Int).Sub(amount, balance)
+	delta := new(big.Int).Sub(amount.ToBig(), balance)
 	switch delta.Sign() {
 	case 1:
 		// mint
@@ -219,7 +220,7 @@ func (k *Keeper) DeleteAccount(ctx sdk.Context, addr common.Address) error {
 	}
 
 	// clear balance
-	if err := k.SetBalance(ctx, addr, new(big.Int)); err != nil {
+	if err := k.SetBalance(ctx, addr, new(uint256.Int)); err != nil {
 		return err
 	}
 

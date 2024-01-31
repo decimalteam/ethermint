@@ -18,7 +18,7 @@ package statedb
 
 import (
 	"bytes"
-	"math/big"
+	"github.com/holiman/uint256"
 	"sort"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -104,13 +104,13 @@ type (
 	suicideChange struct {
 		account     *common.Address
 		prev        bool // whether account had already suicided
-		prevbalance *big.Int
+		prevbalance *uint256.Int
 	}
 
 	// Changes to individual accounts.
 	balanceChange struct {
 		account *common.Address
-		prev    *big.Int
+		prev    *uint256.Int
 	}
 	nonceChange struct {
 		account *common.Address

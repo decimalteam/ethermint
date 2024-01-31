@@ -17,14 +17,15 @@ package statedb
 
 import (
 	"fmt"
-	"math/big"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/params"
+	"github.com/holiman/uint256"
 	"sort"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
@@ -65,6 +66,29 @@ type StateDB struct {
 
 	// Per-transaction access list
 	accessList *accessList
+}
+
+func (s *StateDB) GetTransientState(addr common.Address, key common.Hash) common.Hash {
+	return common.Hash{}
+}
+
+func (s *StateDB) SetTransientState(addr common.Address, key, value common.Hash) {}
+
+func (s *StateDB) SelfDestruct(address common.Address) {}
+
+func (s *StateDB) HasSelfDestructed(address common.Address) bool {
+	return false
+}
+
+func (s *StateDB) Selfdestruct6780(address common.Address) {}
+
+func (s *StateDB) Prepare(
+	rules params.Rules,
+	sender, coinbase common.Address,
+	dest *common.Address,
+	precompiles []common.Address,
+	txAccesses ethtypes.AccessList,
+) {
 }
 
 // New creates a new state from a given trie.
@@ -131,12 +155,12 @@ func (s *StateDB) Empty(addr common.Address) bool {
 }
 
 // GetBalance retrieves the balance from the given address or 0 if object not found
-func (s *StateDB) GetBalance(addr common.Address) *big.Int {
+func (s *StateDB) GetBalance(addr common.Address) *uint256.Int {
 	stateObject := s.getStateObject(addr)
 	if stateObject != nil {
 		return stateObject.Balance()
 	}
-	return common.Big0
+	return uint256.NewInt(0)
 }
 
 // GetNonce returns the nonce of account, 0 if not exists.
@@ -303,7 +327,7 @@ func (s *StateDB) setStateObject(object *stateObject) {
  */
 
 // AddBalance adds amount to the account associated with addr.
-func (s *StateDB) AddBalance(addr common.Address, amount *big.Int) {
+func (s *StateDB) AddBalance(addr common.Address, amount *uint256.Int) {
 	stateObject := s.getOrNewStateObject(addr)
 	if stateObject != nil {
 		stateObject.AddBalance(amount)
@@ -311,7 +335,7 @@ func (s *StateDB) AddBalance(addr common.Address, amount *big.Int) {
 }
 
 // SubBalance subtracts amount from the account associated with addr.
-func (s *StateDB) SubBalance(addr common.Address, amount *big.Int) {
+func (s *StateDB) SubBalance(addr common.Address, amount *uint256.Int) {
 	stateObject := s.getOrNewStateObject(addr)
 	if stateObject != nil {
 		stateObject.SubBalance(amount)
@@ -355,10 +379,10 @@ func (s *StateDB) Suicide(addr common.Address) bool {
 	s.journal.append(suicideChange{
 		account:     &addr,
 		prev:        stateObject.suicided,
-		prevbalance: new(big.Int).Set(stateObject.Balance()),
+		prevbalance: new(uint256.Int).Set(stateObject.Balance()),
 	})
 	stateObject.markSuicided()
-	stateObject.account.Balance = new(big.Int)
+	stateObject.account.Balance = new(uint256.Int)
 
 	return true
 }

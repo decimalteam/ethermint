@@ -184,6 +184,7 @@ func NewRPCTransaction(
 	}
 	from, _ := ethtypes.Sender(signer, tx)
 	v, r, s := tx.RawSignatureValues()
+
 	result := &RPCTransaction{
 		Type:     hexutil.Uint64(tx.Type()),
 		From:     from,

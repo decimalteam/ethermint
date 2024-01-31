@@ -16,6 +16,7 @@
 package vm
 
 import (
+	"github.com/decimalteam/ethermint/x/evm/statedb"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -42,16 +43,16 @@ type EVM interface {
 	Cancel()
 	Cancelled() bool //nolint
 	Interpreter() *vm.EVMInterpreter
-	Call(caller vm.ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error)
-	CallCode(caller vm.ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error)
+	Call(caller vm.ContractRef, addr common.Address, input []byte, gas uint64, value *uint256.Int) (ret []byte, leftOverGas uint64, err error)
+	CallCode(caller vm.ContractRef, addr common.Address, input []byte, gas uint64, value *uint256.Int) (ret []byte, leftOverGas uint64, err error)
 	DelegateCall(caller vm.ContractRef, addr common.Address, input []byte, gas uint64) (ret []byte, leftOverGas uint64, err error)
 	StaticCall(caller vm.ContractRef, addr common.Address, input []byte, gas uint64) (ret []byte, leftOverGas uint64, err error)
-	Create(caller vm.ContractRef, code []byte, gas uint64, value *big.Int) (ret []byte, contractAddr common.Address, leftOverGas uint64, err error)
+	Create(caller vm.ContractRef, code []byte, gas uint64, value *uint256.Int) (ret []byte, contractAddr common.Address, leftOverGas uint64, err error)
 	Create2(
 		caller vm.ContractRef,
 		code []byte,
 		gas uint64,
-		endowment *big.Int,
+		endowment *uint256.Int,
 		salt *uint256.Int) (
 		ret []byte, contractAddr common.Address, leftOverGas uint64, err error,
 	)
@@ -74,7 +75,7 @@ type EVM interface {
 type Constructor func(
 	blockCtx vm.BlockContext,
 	txCtx vm.TxContext,
-	stateDB vm.StateDB,
+	stateDB *statedb.StateDB,
 	chainConfig *params.ChainConfig,
 	config vm.Config,
 	customPrecompiles PrecompiledContracts,
