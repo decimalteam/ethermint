@@ -231,6 +231,7 @@ func (k *Keeper) ApplyTransaction(ctx sdk.Context, msgEth *types.MsgEthereumTx) 
 
 			// If the tx failed in post processing hooks, we should clear the logs
 			res.Logs = nil
+			res.PostTxError = err.Error()
 		} else if commit != nil {
 			// PostTxProcessing is successful, commit the tmpCtx
 			commit()
