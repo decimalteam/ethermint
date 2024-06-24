@@ -2,7 +2,6 @@ package keeper_test
 
 import (
 	"github.com/holiman/uint256"
-	"math/big"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -140,7 +139,7 @@ func BenchmarkSubBalance(b *testing.B) {
 	suite.SetupTestWithT(b)
 	vmdb := suite.StateDB()
 
-	amt := big.NewInt(10)
+	amt := uint256.NewInt(10)
 
 	b.ResetTimer()
 	b.ReportAllocs()

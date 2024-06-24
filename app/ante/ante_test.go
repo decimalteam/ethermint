@@ -3,6 +3,7 @@ package ante_test
 import (
 	"errors"
 	"fmt"
+	"github.com/holiman/uint256"
 	"math/big"
 	"strings"
 	"testing"
@@ -69,7 +70,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 		suite.Require().NoError(acc.SetSequence(1))
 		suite.app.AccountKeeper.SetAccount(suite.ctx, acc)
 
-		suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt(10000000000))
+		suite.app.EvmKeeper.SetBalance(suite.ctx, addr, uint256.NewInt(10000000000))
 
 		suite.app.FeeMarketKeeper.SetBaseFee(suite.ctx, big.NewInt(100))
 	}
@@ -1204,7 +1205,7 @@ func (suite AnteTestSuite) TestAnteHandlerWithDynamicTxFee() {
 			suite.app.AccountKeeper.SetAccount(suite.ctx, acc)
 
 			suite.ctx = suite.ctx.WithIsCheckTx(tc.checkTx).WithIsReCheckTx(tc.reCheckTx)
-			suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt((ethparams.InitialBaseFee+10)*100000))
+			suite.app.EvmKeeper.SetBalance(suite.ctx, addr, uint256.NewInt((ethparams.InitialBaseFee+10)*100000))
 			_, err := suite.anteHandler(suite.ctx, tc.txFn(), false)
 			if tc.expPass {
 				suite.Require().NoError(err)
@@ -1333,7 +1334,7 @@ func (suite AnteTestSuite) TestAnteHandlerWithParams() {
 			suite.app.AccountKeeper.SetAccount(suite.ctx, acc)
 
 			suite.ctx = suite.ctx.WithIsCheckTx(true)
-			suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt((ethparams.InitialBaseFee+10)*100000))
+			suite.app.EvmKeeper.SetBalance(suite.ctx, addr, uint256.NewInt((ethparams.InitialBaseFee+10)*100000))
 			_, err := suite.anteHandler(suite.ctx, tc.txFn(), false)
 			if tc.expErr == nil {
 				suite.Require().NoError(err)
