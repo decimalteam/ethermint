@@ -3,6 +3,7 @@ package keeper_test
 import (
 	_ "embed"
 	"encoding/json"
+	"github.com/holiman/uint256"
 	"math"
 	"math/big"
 	"os"
@@ -499,7 +500,7 @@ func (suite *KeeperTestSuite) TestGetAccountStorage() {
 
 func (suite *KeeperTestSuite) TestGetAccountOrEmpty() {
 	empty := statedb.Account{
-		Balance:  new(big.Int),
+		Balance:  new(uint256.Int),
 		CodeHash: types.EmptyCodeHash,
 	}
 
